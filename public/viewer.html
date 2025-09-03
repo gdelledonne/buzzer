@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantabuzzer - Viewer</title>
+    <style>
+        /* Stili CSS copiati dal tuo file originale */
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background-color:#111827;color:#f3f4f6;display:flex;justify-content:center;align-items:center;flex-direction:column;min-height:100vh;margin:0;padding:1rem;box-sizing:border-box;text-align:center}h1{font-size:2.5rem;margin-bottom:.5rem}p{font-size:1.1rem;color:#9ca3af;margin-bottom:2rem}.top-section{display:flex;align-items:stretch;gap:1.5rem;width:100%;max-width:800px;margin-bottom:1.5rem}#display-box{flex-grow:1;height:150px;border-radius:.75rem;transition:background-color .3s ease;box-shadow:0 4px 6px -1px #0000001a,0 2px 4px -2px #0000001a}.counter-controls{display:flex;flex-direction:column;gap:1rem}.control-input{width:400px;text-align:center;border-radius:.75rem;border:2px solid #374151;background-color:#1f2937;color:#f3f4f6;padding:.5rem;box-sizing:border-box}#timer{font-size:2.5rem;font-weight:700}#key-counter{font-size:2.5rem;font-weight:700}#key-counter::-webkit-outer-spin-button,#key-counter::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}#key-counter[type=number]{-moz-appearance:textfield}#text-input{font-size:2.5rem;font-weight:700}#reset-button{width:100px;padding:.75rem;font-size:1rem;font-weight:600;color:#f3f4f6;background-color:#3b82f6;border:none;border-radius:.75rem;cursor:pointer;transition:background-color .2s ease,transform .1s ease}#reset-button:hover{background-color:#2563eb}#reset-button:active{transform:scale(.95)}.container{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}.box{width:200px;height:100px;border-radius:.75rem;display:flex;justify-content:center;align-items:center;font-size:2rem;font-weight:700;transition:transform .2s ease,filter .2s ease;box-shadow:0 4px 6px -1px #0000001a,0 2px 4px -2px #0000001a}.box.active{transform:scale(1.1);filter:brightness(120%);box-shadow:0 10px 15px -3px #00000033,0 4px 6px -2px #0000001a}@media (max-width:600px){.top-section{flex-direction:column;max-width:216px}#display-box{height:100px}.counter-controls{flex-direction:row;flex-wrap:wrap}.control-input,#reset-button{width:calc(50% - .5rem)}#text-input{width:100%}.container{grid-template-columns:repeat(2,1fr)}}
+    </style>
+</head>
+<body>
+
+    <h1>Fantabuzzer</h1>
+    <br/>
+    <div class="top-section">
+        <div id="display-box"></div>
+        <div class="counter-controls">
+			TIMER: <input type="number" id="timer" class="control-input" value="0" min="0" readonly>
+            Euri: <input type="number" id="key-counter" class="control-input" value="0" min="0">
+            Nome Calciatore: <input type="text" id="text-input" class="control-input" placeholder="Nome...">
+            <button id="reset-button">Reset</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="box" id="box-1">PAGE UP</div>
+        <div class="box" id="box-2">PAGE DOWN</div>
+        <div class="box" id="box-3">FINE</div>
+        <div class="box" id="box-4">DESTRA</div>
+        <div class="box" id="box-5">Q</div>
+        <div class="box" id="box-6">A</div>
+        <div class="box" id="box-7">Z</div>
+        <div class="box" id="box-8">C</div>
+    </div>
+
+    <script>
+        const keyMap = {
+            '1': { id: 'box-1', key: 'PageUp', color: '#FF1744', textColor: '#FFFFFF' },
+            '2': { id: 'box-2', key: 'PageDown', color: '#00E676', textColor: '#FFFFFF' },
+            '3': { id: 'box-3', key: 'End', color: '#3D5AFE', textColor: '#FFFFFF' },
+            '4': { id: 'box-4', key: 'ArrowRight', color: '#795548', textColor: '#FFFFFF' },
+            '5': { id: 'box-5', key: 'q', color: '#00E5FF', textColor: '#000000' },
+            '6': { id: 'box-6', key: 'a', color: '#FFEA00', textColor: '#000000' },
+            '7': { id: 'box-7', key: 'z', color: '#FFFFFF', textColor: '#000000' },
+            '8': { id: 'box-8', key: 'c', color: '#9C27B0', textColor: '#FFFFFF' }
+        };
+        
+        const displayBox = document.getElementById('display-box');
+        const counter = document.getElementById('key-counter');
+        const textInput = document.getElementById('text-input');
+        const resetButton = document.getElementById('reset-button');
+        const timerInput = document.getElementById('timer');
+        let intervalId = null;
+
+        // Funzione per impostare lo stato iniziale
+        function initializeState() {
+            for (const playerId in keyMap) {
+                const { id, color, textColor } = keyMap[playerId];
+                const box = document.getElementById(id);
+                if (box) {
+                    box.style.backgroundColor = color;
+                    box.style.color = textColor;
+                }
+            }
+            displayBox.style.backgroundColor = '#374151'; 
+            counter.value = 0;
+            textInput.value = '';
+            timerInput.value = 0;
+            if (intervalId) clearInterval(intervalId);
+            intervalId = null;
+        }
+
+        function handleBuzz(playerId) {
+            const playerInfo = keyMap[playerId];
+            if (!playerInfo) return;
+
+            const { id, color } = playerInfo;
+            const box = document.getElementById(id);
+
+            if (box) {
+                displayBox.style.backgroundColor = color;
+                counter.value = parseInt(counter.value, 10) + 1;
+                
+                startTimer();
+                
+                box.classList.add('active');
+                setTimeout(() => {
+                    box.classList.remove('active');
+                }, 200);
+            }
+        }
+        
+        function startTimer() {
+            if (intervalId) clearInterval(intervalId);
+            let countdown = 30;
+            timerInput.value = countdown;
+            intervalId = setInterval(() => {
+                countdown--;
+                timerInput.value = countdown;
+                if (countdown <= 0) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            }, 1000);
+        }
+
+        // ---- LOGICA WEBSOCKET ----
+        const ws = new WebSocket(`ws://${window.location.host}`);
+
+        ws.onopen = () => console.log('Connesso al server WebSocket');
+        ws.onerror = (error) => console.error('Errore WebSocket:', error);
+        ws.onclose = () => console.log('Disconnesso dal server WebSocket');
+
+        ws.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                console.log('Messaggio ricevuto dal server:', data);
+                if (data.type === 'buzz') {
+                    handleBuzz(data.playerId);
+                } else if (data.type === 'reset') {
+                    initializeState();
+                }
+            } catch (e) {
+                console.error('Errore nel parsing del messaggio dal server', e);
+            }
+        };
+
+        // Pulsante di reset invia un messaggio al server
+        resetButton.addEventListener('click', () => {
+            ws.send(JSON.stringify({ type: 'reset' }));
+        });
+        
+        document.addEventListener('DOMContentLoaded', initializeState);
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "fantabuzzer-server",
+  "version": "1.0.0",
+  "description": "Server per Fantabuzzer multi-giocatore",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "ws": "^8.17.0"
+  }
+}
