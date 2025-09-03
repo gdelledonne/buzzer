@@ -49,11 +49,10 @@ wss.on('connection', (ws) => {
     });
 });
 
-// Avvia il server sulla porta 3000
-const PORT = 3000;
+// MODIFICA CHIAVE: Usa la porta fornita dall'ambiente o 3000 come default
+const PORT = process.env.PORT || 3000;
+
 server.listen(PORT, () => {
-    console.log(`Server avviato su http://localhost:${PORT}`);
-    console.log(`Pagina Viewer: http://localhost:${PORT}/viewer.html`);
-    console.log(`Pagine Giocatori: http://localhost:${PORT}/player.html?id=1 (cambiare id da 1 a 8)`);
+    console.log(`Server avviato sulla porta ${PORT}`);
 });
 
